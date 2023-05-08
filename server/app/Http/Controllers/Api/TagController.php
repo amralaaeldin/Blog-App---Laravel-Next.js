@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Tag;
 
 class TagController extends Controller
 {
@@ -12,38 +12,28 @@ class TagController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Tag::select('id', 'name')->get());
+    }
+
+    public function getPostsOnTag(Tag $tag)
+    {
+        return response()->json($tag->posts()->select('id', 'title', 'body', 'created_at', 'updated_at')->get());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store($tagNames = [])
     {
-        //
-    }
+        $existingTags = Tag::select('id', 'name')->whereIn('name', $tagNames)->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $newTags = collect($tagNames)->diff($existingTags->pluck('name'))
+            ->map(function ($tagName) {
+                return Tag::create(['name' => $tagName]);
+            });
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $tags = $existingTags->merge($newTags)->toArray();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return $tags;
     }
 }
