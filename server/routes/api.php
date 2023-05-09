@@ -22,21 +22,37 @@ use Illuminate\Support\Facades\Auth;
 */
 
 // tags routes
-Route::post('tags', [TagController::class, 'store']);
-
-Route::middleware(['auth:sanctum', 'role:admin'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('tags', [TagController::class, 'index']);
 
 // comments routes
-Route::apiResource('comments', CommentController::class)->only(['destroy', 'update']);
-Route::get('posts/{postId}/comments', [CommentController::class, 'index']);
-Route::post('posts/{postId}/comments', [CommentController::class, 'store']);
+Route::middleware(['auth:sanctum'])
+    ->post('posts/{postId}/comments', [CommentController::class, 'store']);
+Route::middleware(['auth:sanctum', 'is_owner:comment'])
+    ->patch('posts/{postId}/comments/{id}', [CommentController::class, 'update']);
+Route::middleware(['is_owner_or_can:comment'])
+    ->delete('posts/{postId}/comments/{id}', [CommentController::class, 'destroy']);
 
 // posts routes
-Route::apiResource('posts', PostController::class);
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('posts', [PostController::class, 'index']);
+    Route::get('posts/{id}', [PostController::class, 'show']);
+    Route::middleware(['is_accepted'])
+        ->post('posts', [PostController::class, 'store']);
+    Route::middleware(['is_owner:post'])
+        ->patch('posts/{id}', [PostController::class, 'update']);
+    Route::middleware(['is_owner_or_can:post'])
+        ->delete('posts/{id}', [PostController::class, 'destroy']);
+});
 
 // users routes
-Route::apiResource('users', UserController::class);
+Route::middleware(['auth:sanctum', 'is_yourself_or_can'])
+    ->apiResource('users', UserController::class)
+    ->only(['show', 'update', 'destroy']);
+
+Route::group(['middleware' => ['auth:sanctum', 'can:accept-users']], function () {
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/accept', [UserController::class, 'indexPending']);
+    Route::patch('users/{id}/accept', [UserController::class, 'accept']);
+});
 
 require __DIR__ . '/auth-api.php';

@@ -24,7 +24,7 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        $token = $user->createToken('api_token')->plainTextToken;
+        $token = $user->createToken(date("Y-m-d H:i:s"))->plainTextToken;
 
         return response()->json([
             'user' => $user,
@@ -37,7 +37,6 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'device_name' => 'required',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -49,7 +48,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $user->createToken($request->device_name)->plainTextToken,
+            'token' => $user->createToken(date("Y-m-d H:i:s"))->plainTextToken,
             'user' => $user,
         ]);
     }

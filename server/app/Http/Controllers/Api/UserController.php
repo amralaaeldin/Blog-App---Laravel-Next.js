@@ -14,7 +14,8 @@ class UserController extends Controller
     public function index()
     {
         return response()->json(
-            User::where('accepted', true)
+            User::doesntHave('roles')
+                ->whereNotNull('accepted')
                 ->withCount('posts')
                 ->select('id', 'name', 'email')->get()
         );
@@ -23,7 +24,9 @@ class UserController extends Controller
     public function indexPending()
     {
         return response()->json(
-            User::where('accepted', false)->select('id', 'name', 'email')->get()
+            User::doesntHave('roles')
+                ->whereNull('accepted')
+                ->select('id', 'name', 'email')->get()
         );
     }
 

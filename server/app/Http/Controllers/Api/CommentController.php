@@ -9,13 +9,6 @@ use App\Models\Comment;
 
 class CommentController extends Controller
 {
-    public function index($postId)
-    {
-        return response()->json(
-            Comment::where('post_id', $postId)->get()
-        );
-    }
-
     /**
      * Store a newly created resource in storage.
      */

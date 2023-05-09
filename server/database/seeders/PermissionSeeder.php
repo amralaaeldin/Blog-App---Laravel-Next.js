@@ -19,26 +19,29 @@ class PermissionSeeder extends Seeder
   public function run()
   {
     $permissions = [
-      'create admins',
-      'update admins',
-      'delete admins',
-      'view admins',
-      'accept users',
-      'ban users',
-      'view users',
+      'create-admins',
+      'update-admins',
+      'delete-admins',
+      'view-admins',
+      'accept-users',
+      'ban-users',
+      'view-users',
     ];
 
     $superAdminPermissions = [
-      'create admins',
-      'update admins',
-      'delete admins',
-      'view admins',
+      'create-admins',
+      'update-admins',
+      'delete-admins',
+      'view-admins',
+      'accept-users',
+      'ban-users',
+      'view-users',
     ];
 
     $adminPermissions = [
-      'accept users',
-      'ban users',
-      'view users',
+      'accept-users',
+      'ban-users',
+      'view-users',
     ];
 
 
@@ -62,13 +65,13 @@ class PermissionSeeder extends Seeder
     $superAdmin1 = User::create([
       'name' => 'superadmin1',
       'email' => 'superadmin@admin.com',
-      'password' => Hash::make('12345678')
+      'password' => Hash::make('12345678'),
     ]);
 
     $admin1 = User::create([
       'name' => 'admin1',
       'email' => 'admin@admin.com',
-      'password' => Hash::make('12345678')
+      'password' => Hash::make('12345678'),
     ]);
 
     $superAdmin1->assignRole($super_admin);
