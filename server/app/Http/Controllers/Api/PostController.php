@@ -64,13 +64,20 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string|max:2500',
+            'tagNames' => 'array|max:10'
         ]);
 
+        $post = Post::where('id', $id)->update([
+            'title' => $request->title,
+            'body' => $request->body,
+        ]);
+
+        $tags = (new TagController)->store($request->tagNames);
+
+        $post->tags()->sync($tags);
+
         return response()->json(
-            Post::where('id', $id)->update([
-                'title' => $request->title,
-                'body' => $request->body,
-            ])
+            $post
         );
     }
 
