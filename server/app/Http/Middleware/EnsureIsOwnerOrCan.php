@@ -17,10 +17,11 @@ class EnsureIsOwnerOrCan
     {
         $Model = '\App\Models' . '\\' . ucfirst($modelName);
 
+
         if (
-            !$request->user()->hasAnyRole(['admin', 'super-admin']) ||
-            $request->user()->id != $Model::where('id', $request->id)->select('id')->first()->user->id ||
-            $request->user()->id != $Model::where('id', $request->id)->select('id')->first()->post?->user->id
+            !$request->user()->hasAnyRole(['admin', 'super-admin']) &&
+            $request->user()->id != $Model::where('id', $request->id)->select('id', 'user_id')->first()?->user->id &&
+            $request->user()->id != $Model::where('id', $request->id)->select('id', 'post_id')->first()?->post->user->id
         ) {
             return abort(403, 'You are not authorized to access this resource.');
         }

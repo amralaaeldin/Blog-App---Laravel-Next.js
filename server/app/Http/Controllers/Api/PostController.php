@@ -14,9 +14,10 @@ class PostController extends Controller
     public function index()
     {
         return response()->json(
-            Post::with('user:id,name,email')
+            Post::with('user', 'tags')
+                ->select('id', 'title',  'body', 'created_at', 'updated_at', 'user_id')
                 ->withCount('comments')
-                ->select('id', 'title',  'body', 'created_at', 'updated_at')->get()
+                ->get()
         );
     }
 
@@ -37,6 +38,7 @@ class PostController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
+
         $tags = (new TagController)->store($request->tagNames);
 
         $post->tags()->attach($tags);
@@ -52,7 +54,7 @@ class PostController extends Controller
         return response()->json(
             Post::with('user:id,name,email')
                 ->with('comments.user:id,name,email')
-                ->select('id', 'name')::where('id', $id)->get()
+                ->select('id', 'title', 'body', 'user_id')->where('id', $id)->get()
         );
     }
 
@@ -67,7 +69,8 @@ class PostController extends Controller
             'tagNames' => 'array|max:10'
         ]);
 
-        $post = Post::where('id', $id)->update([
+        $post = Post::find($id);;
+        $post->update([
             'title' => $request->title,
             'body' => $request->body,
         ]);
@@ -77,7 +80,9 @@ class PostController extends Controller
         $post->tags()->sync($tags);
 
         return response()->json(
-            $post
+            [
+                'message' => 'Post updated successfully',
+            ]
         );
     }
 
@@ -86,6 +91,11 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        return response()->json(Post::where('id', $id)->delete());
+        Post::where('id', $id)->delete();
+        return response()->json(
+            [
+                'message' => 'Post deleted successfully',
+            ]
+        );
     }
 }

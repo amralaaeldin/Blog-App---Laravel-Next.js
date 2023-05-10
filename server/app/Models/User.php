@@ -22,7 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'accepted',
+        'accepted_at',
         'password',
     ];
 
@@ -43,7 +43,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'accepted_at' => 'datetime',
     ];
+
 
     public function posts(): HasMany
     {

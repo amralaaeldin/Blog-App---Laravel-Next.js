@@ -17,8 +17,8 @@ class EnsureYourselfOrCan
     public function handle(Request $request, Closure $next): Response
     {
         if (
-            !$request->user()->hasAnyRole(['admin', 'super-admin']) ||
-            $request->user()->id != User::where('id', $request->id)->select('id')->first()->id
+            !$request->user()->hasAnyRole(['admin', 'super-admin']) &&
+            $request->user()->id != User::where('id', $request->id)->select('id')->first()?->id
         ) {
             return abort(403, 'You are not authorized to access this resource.');
         }

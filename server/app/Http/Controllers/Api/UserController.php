@@ -15,9 +15,9 @@ class UserController extends Controller
     {
         return response()->json(
             User::doesntHave('roles')
-                ->whereNotNull('accepted')
-                ->withCount('posts')
-                ->select('id', 'name', 'email')->get()
+                ->whereNotNull('accepted_at')
+                ->select('id', 'name', 'email')
+                ->withCount('posts')->get()
         );
     }
 
@@ -25,7 +25,7 @@ class UserController extends Controller
     {
         return response()->json(
             User::doesntHave('roles')
-                ->whereNull('accepted')
+                ->whereNull('accepted_at')
                 ->select('id', 'name', 'email')->get()
         );
     }
@@ -50,28 +50,33 @@ class UserController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
+        User::where('id', $id)->update([
+            'name' => $request->name,
+            'password' => bcrypt($request->password),
+        ]);
+
         return response()->json(
-            User::where('id', $id)->update([
-                'name' => $request->name,
-                'password' => bcrypt($request->password),
-            ])
+            [
+                'message' => 'User updated successfully',
+            ]
         );
     }
 
     public function accept($id)
     {
-        $user = User::where('id', $id)->select('id', 'name', 'email', 'accepted')->first();
-        if ($user->accepted) {
+        $user = User::where('id', $id)->select('id', 'name', 'email', 'accepted_at')->first();
+        if ($user->accepted_at) {
             return response()->json([
                 'message' => 'User already accepted',
             ], 400);
         }
 
+        $user->update([
+            'accepted_at' => date("Y-m-d H:i:s"),
+        ]);
+
         return response()->json(
             [
-                'user' => $user->update([
-                    'accepted' => true,
-                ]),
                 'message' => 'User accepted successfully',
             ]
         );
@@ -82,6 +87,9 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        return response()->json(User::where('id', $id)->delete());
+        User::where('id', $id)->delete();
+        return response()->json([
+            'message' => 'User deleted successfully',
+        ]);
     }
 }

@@ -20,13 +20,6 @@ class Tag extends Model
         'name',
     ];
 
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            set: fn (string $value) => ucfirst(trim($value)),
-        );
-    }
-
     public function posts(): BelongsToMany
     {
         return $this->BelongsToMany(Post::class);

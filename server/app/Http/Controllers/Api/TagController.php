@@ -17,7 +17,7 @@ class TagController extends Controller
 
     public function getPostsOnTag(Tag $tag)
     {
-        return response()->json($tag->posts()->select('id', 'title', 'body', 'created_at', 'updated_at')->get());
+        return response()->json($tag->posts);
     }
 
     /**
@@ -25,6 +25,10 @@ class TagController extends Controller
      */
     public function store($tagNames = [])
     {
+        foreach ($tagNames as $key => $value) {
+            $tagNames[$key] = ucfirst(trim($value));
+        }
+
         $existingTags = Tag::select('id', 'name')->whereIn('name', $tagNames)->get();
 
         $newTags = collect($tagNames)->diff($existingTags->pluck('name'))
@@ -32,7 +36,7 @@ class TagController extends Controller
                 return Tag::create(['name' => $tagName]);
             });
 
-        $tags = $existingTags->merge($newTags)->toArray();
+        $tags = $existingTags->merge($newTags)->pluck('id')->toArray();
 
         return $tags;
     }

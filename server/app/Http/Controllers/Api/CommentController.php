@@ -30,24 +30,33 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $_, $id)
     {
         $request->validate([
             'body' => 'required|string|max:2500',
         ]);
 
+        Comment::where('id', $id)->update([
+            'body' => $request->body,
+        ]);
+
         return response()->json(
-            Comment::where('id', $id)->update([
-                'body' => $request->body,
-            ])
+            [
+                'message' => 'Comment updated successfully',
+            ]
         );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($_, $id)
     {
-        return response()->json(Comment::where('id', $id)->delete());
+        Comment::where('id', $id)->delete();
+        return response()->json(
+            [
+                'message' => 'Comment deleted successfully',
+            ]
+        );
     }
 }
