@@ -13,13 +13,12 @@ class EnsureIsOwnerOrCan
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $modelName): Response
+    public function handle(Request $request, Closure $next, $modelName, ...$roles): Response
     {
         $Model = '\App\Models' . '\\' . ucfirst($modelName);
 
-
         if (
-            !$request->user()->hasAnyRole(['admin', 'super-admin']) &&
+            !$request->user()->hasAnyRole($roles) &&
             $request->user()->id != $Model::where('id', $request->id)->select('id', 'user_id')->first()?->user->id &&
             $request->user()->id != $Model::where('id', $request->id)->select('id', 'post_id')->first()?->post->user->id
         ) {
