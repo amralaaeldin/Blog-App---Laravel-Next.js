@@ -69,7 +69,7 @@ class PostController extends Controller
             'tagNames' => 'array|max:10'
         ]);
 
-        $post = Post::find($id);;
+        $post = Post::find($id);
         $post->update([
             'title' => $request->title,
             'body' => $request->body,
