@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -24,11 +25,11 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        $token = $user->createToken(date("Y-m-d H:i:s"))->plainTextToken;
+        $token = auth()->login($user);
 
         return response()->json([
+            'token' => $this->respondWithToken($token),
             'user' => $user,
-            'token' => $token,
         ], 201);
     }
 
@@ -39,23 +40,35 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $credentials = request(['email', 'password']);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if (!$token = auth()->attempt($credentials)) {
+            return response()->json(['msessage' => 'The provided credentials are incorrect.'], 401);
         }
 
         return response()->json([
-            'token' => $user->createToken(date("Y-m-d H:i:s"))->plainTextToken,
-            'user' => $user,
+            'token' => $this->respondWithToken($token),
+            'user' => auth()->user(),
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->tokens()->delete();
+        auth()->logout();
         return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function refresh()
+    {
+        return response()->json($this->respondWithToken(auth()->refresh()));
+    }
+
+    protected function respondWithToken($token)
+    {
+        return [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ];
     }
 }

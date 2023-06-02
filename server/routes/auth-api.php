@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 
-Route::post('/register',   [AuthController::class, 'register']);
-Route::post('/login',   [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout',  [AuthController::class, 'logout']);
+Route::controller(AuthController::class)->group(function () {
+  Route::post('register', 'register');
+  Route::post('login', 'login');
+  Route::post('logout', 'logout')->middleware('auth');
+  Route::post('refresh', 'refresh');
+});
