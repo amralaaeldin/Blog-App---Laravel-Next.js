@@ -9,15 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureIsAccepted
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->user()->accepted_at) {
-            return abort(403, 'You are not authorized to access this resource.');
+            throw new \App\Exceptions\NotAuthorizedException(__("You are not authorized to do that."));
         }
 
         return $next($request);

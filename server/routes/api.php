@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Auth;
 // tags routes
 Route::get('tags', [TagController::class, 'index']);
 Route::middleware(['auth'])
-    ->get('tags/{tag}', [TagController::class, 'getPostsOnTag']);
+    ->get('tags/{tag}', [TagController::class, 'indexPostsOnTag']);
 
 // comments routes
 Route::middleware(['auth', 'is_accepted'])

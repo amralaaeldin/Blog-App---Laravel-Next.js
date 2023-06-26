@@ -3,57 +3,62 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return response()->json(
-            User::doesntHave('roles')
-                ->whereNotNull('accepted_at')
-                ->select('id', 'name', 'email')
-                ->withCount('posts')->get()
-        );
+        try {
+            return response()->json(
+                User::doesntHave('roles')
+                    ->whereNotNull('accepted_at')
+                    ->select('id', 'name', 'email')
+                    ->withCount('posts')->get()
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
     }
 
     public function indexPending()
     {
-        return response()->json(
-            User::doesntHave('roles')
-                ->whereNull('accepted_at')
-                ->select('id', 'name', 'email')->get()
-        );
+        try {
+            return response()->json(
+                User::doesntHave('roles')
+                    ->whereNull('accepted_at')
+                    ->select('id', 'name', 'email')->get()
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        return response()->json(
-            User::where('id', $id)->select('id', 'name', 'email')->get()
-        );
+        try {
+            return response()->json(
+                User::where('id', $id)->select('id', 'name', 'email')->findOrFail($id)
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\NotFoundException(__('Not found.'));
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+        $user = User::where('id', $id)->first();
+        if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
-        User::where('id', $id)->update([
-            'name' => $request->name,
-            'password' => bcrypt($request->password),
-        ]);
+        try {
+            $user->update([
+                'name' => $request->name,
+                'password' => bcrypt($request->password),
+            ]);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
 
         return response()->json(
             [
@@ -65,15 +70,19 @@ class UserController extends Controller
     public function accept($id)
     {
         $user = User::where('id', $id)->select('id', 'name', 'email', 'accepted_at')->first();
+        if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
+
         if ($user->accepted_at) {
-            return response()->json([
-                'message' => 'User already accepted',
-            ], 400);
+            throw new \App\Exceptions\BadRequestException(__('User already accepted.'));
         }
 
-        $user->update([
-            'accepted_at' => date("Y-m-d H:i:s"),
-        ]);
+        try {
+            $user->update([
+                'accepted_at' => date("Y-m-d H:i:s"),
+            ]);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
 
         return response()->json(
             [
@@ -82,12 +91,16 @@ class UserController extends Controller
         );
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        User::where('id', $id)->delete();
+        $user = User::where('id', $id)->first();
+        if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
+
+        try {
+            $user->delete();
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
         return response()->json([
             'message' => 'User deleted successfully',
         ]);

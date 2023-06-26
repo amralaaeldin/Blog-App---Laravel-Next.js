@@ -2,30 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Validation\ValidationException;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
-
-        $token = auth()->login($user);
+            $token = auth()->login($user);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
 
         return response()->json([
             'token' => $this->respondWithToken($token),
@@ -33,17 +30,16 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $credentials = request(['email', 'password']);
 
-        $credentials = request(['email', 'password']);
-
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['msessage' => 'The provided credentials are incorrect.'], 401);
+            if (!$token = auth()->attempt($credentials)) {
+                return response()->json(['msessage' => 'The provided credentials are incorrect.'], 401);
+            }
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
         }
 
         return response()->json([
@@ -54,13 +50,21 @@ class AuthController extends Controller
 
     public function logout()
     {
-        auth()->logout();
+        try {
+            auth()->logout();
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
         return response()->json(['message' => 'Logged out successfully']);
     }
 
     public function refresh()
     {
-        return response()->json($this->respondWithToken(auth()->refresh()));
+        try {
+            return response()->json($this->respondWithToken(auth()->refresh()));
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
     }
 
     protected function respondWithToken($token)
@@ -68,7 +72,7 @@ class AuthController extends Controller
         return [
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_at' => now()->addMinutes(auth()->factory()->getTTL())->toDateTimeString()
         ];
     }
 }

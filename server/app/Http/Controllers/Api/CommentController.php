@@ -3,42 +3,41 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
 
 
 class CommentController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, $postId)
+    public function store(StoreCommentRequest $request, $postId)
     {
-        $request->validate([
-            'body' => 'required|string|max:2500',
-        ]);
-
-        return response()->json(
-            Comment::create([
-                'body' => $request->body,
-                'user_id' => $request->user()->id,
-                'post_id' => $postId,
-            ])
-        );
+        try {
+            return response()->json(
+                Comment::create([
+                    'body' => $request->body,
+                    'user_id' => $request->user()->id,
+                    'post_id' => $postId,
+                ]),
+                201
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $_, $id)
+    public function update(UpdateCommentRequest $request, $_, $id)
     {
-        $request->validate([
-            'body' => 'required|string|max:2500',
-        ]);
+        $comment = Comment::where('id', $id)->first();
+        if (!$comment) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
-        Comment::where('id', $id)->update([
-            'body' => $request->body,
-        ]);
+        try {
+            $comment->update([
+                'body' => $request->body,
+            ]);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
 
         return response()->json(
             [
@@ -47,12 +46,17 @@ class CommentController extends Controller
         );
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($_, $id)
     {
-        Comment::where('id', $id)->delete();
+        $comment = Comment::where('id', $id)->first();
+        if (!$comment) throw new \App\Exceptions\NotFoundException(__('Not found.'));
+
+        try {
+            $comment->delete();
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
+
         return response()->json(
             [
                 'message' => 'Comment deleted successfully',

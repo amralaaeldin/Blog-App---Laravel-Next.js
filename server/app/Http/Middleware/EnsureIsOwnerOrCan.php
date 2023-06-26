@@ -8,11 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureIsOwnerOrCan
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, $modelName, ...$roles): Response
     {
         $Model = '\App\Models' . '\\' . ucfirst($modelName);
@@ -22,7 +17,7 @@ class EnsureIsOwnerOrCan
             $request->user()->id != $Model::where('id', $request->id)->select('id', 'user_id')->first()?->user->id &&
             $request->user()->id != $Model::where('id', $request->id)->select('id', 'post_id')->first()?->post->user->id
         ) {
-            return abort(403, 'You are not authorized to access this resource.');
+            throw new \App\Exceptions\NotAuthorizedException(__("You are not authorized to do that."));
         }
 
         return $next($request);

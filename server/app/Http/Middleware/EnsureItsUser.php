@@ -9,15 +9,10 @@ use App\Models\User;
 
 class EnsureItsUser
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if ($request["haveRoles"]) {
-            return abort(403, 'You are not authorized to access this resource.');
+            throw new \App\Exceptions\NotAuthorizedException(__("You are not authorized to do that."));
         }
 
         return $next($request);

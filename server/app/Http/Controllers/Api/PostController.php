@@ -3,81 +3,76 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use App\Services\StoreTagsService;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return response()->json(
-            Post::with('user', 'tags')
-                ->select('id', 'title',  'body', 'created_at', 'updated_at', 'user_id')
-                ->withCount('comments')
-                ->get()
-        );
+        try {
+            return response()->json(
+                Post::with('user', 'tags')
+                    ->select('id', 'title',  'body', 'created_at', 'updated_at', 'user_id')
+                    ->withCount('comments')
+                    ->get()
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string|max:2500',
-            'tagNames' => 'array|max:10'
-        ]);
-
-        $post = Post::create([
-            'title' => $request->title,
-            'body' => $request->body,
-            'user_id' => $request->user()->id,
-        ]);
-
-
-        $tags = (new TagController)->store($request->tagNames);
-
-        $post->tags()->attach($tags);
-
-        return response()->json($post);
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        return response()->json(
-            Post::with('user:id,name,email')
-                ->with('comments.user:id,name,email')
-                ->select('id', 'title', 'body', 'user_id')->where('id', $id)->get()
-        );
+        try {
+            return response()->json(
+                Post::with('user:id,name,email')
+                    ->with('comments.user:id,name,email')
+                    ->select('id', 'title', 'body', 'user_id')->findOrfail($id)
+            );
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\NotFoundException(__('Not found.'));
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function store(StorePostRequest $request, StoreTagsService $storeTagsService)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string|max:2500',
-            'tagNames' => 'array|max:10'
-        ]);
+        try {
+            $post = Post::create([
+                'title' => $request->title,
+                'body' => $request->body,
+                'user_id' => $request->user()->id,
+            ]);
 
+            $tags = $storeTagsService->store($request->tagNames);
+
+            $post->tags()->attach($tags);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
+
+        return response()->json($post, 201);
+    }
+
+    public function update(UpdatePostRequest $request, $id, StoreTagsService $storeTagsService)
+    {
         $post = Post::find($id);
-        $post->update([
-            'title' => $request->title,
-            'body' => $request->body,
-        ]);
+        if (!$post) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
-        $tags = (new TagController)->store($request->tagNames);
+        try {
+            $post->update([
+                'title' => $request->title,
+                'body' => $request->body,
+            ]);
 
-        $post->tags()->sync($tags);
+            $tags = $storeTagsService->store($request->tagNames);
+
+            $post->tags()->sync($tags);
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
 
         return response()->json(
             [
@@ -86,12 +81,16 @@ class PostController extends Controller
         );
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        Post::where('id', $id)->delete();
+        $post = Post::find($id);
+        if (!$post) throw new \App\Exceptions\NotFoundException(__('Not found.'));
+
+        try {
+            $post->delete();
+        } catch (\Exception $e) {
+            throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
+        }
         return response()->json(
             [
                 'message' => 'Post deleted successfully',
