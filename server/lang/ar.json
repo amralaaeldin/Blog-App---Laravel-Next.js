@@ -1,0 +1,10 @@
+{
+  "An error occurred while retrieving.": "حدث خطأ أثناء جلب البيانات.",
+  "You are not authorized to do that.": "لست مصرحاً بالقيام بذلك.",
+  "Not found.": "غير موجود.",
+  "Created successfully.": "تم الإنشاء بنجاح.",
+  "Updated successfully.": "تم التحديث بنجاح.",
+  "Deleted successfully.": "تم الحذف بنجاح.",
+  "The provided credentials are incorrect.": "المدخلات غير صحيحة.",
+  "Logged out successfully.": "تم تسجيل الخروج بنجاح."
+}

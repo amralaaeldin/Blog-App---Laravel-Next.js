@@ -76,7 +76,7 @@ class PostController extends Controller
 
         return response()->json(
             [
-                'message' => 'Post updated successfully',
+                'message' => __('Updated successfully.'),
             ]
         );
     }
@@ -91,9 +91,10 @@ class PostController extends Controller
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
         }
+        
         return response()->json(
             [
-                'message' => 'Post deleted successfully',
+                'message' => __('Deleted successfully.'),
             ]
         );
     }

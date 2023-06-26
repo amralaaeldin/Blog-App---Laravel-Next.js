@@ -68,7 +68,6 @@ class Kernel extends HttpKernel
         'is_accepted' => \App\Http\Middleware\EnsureIsAccepted::class,
         'is_owner' => \App\Http\Middleware\EnsureIsOwner::class,
         'is_owner_or_can' => \App\Http\Middleware\EnsureIsOwnerOrCan::class,
-        'is_it_user' => \App\Http\Middleware\EnsureItsUser::class,
         'is_yourself_or_can' => \App\Http\Middleware\EnsureYourselfOrCan::class,
     ];
 }

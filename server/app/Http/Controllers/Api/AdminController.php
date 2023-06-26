@@ -25,7 +25,7 @@ class AdminController extends Controller
     public function show($id)
     {
         try {
-            return response()->json(User::select('id', 'name', 'email')->findOrFail($id));
+            return response()->json(User::role('admin')->select('id', 'name', 'email')->findOrFail($id));
         } catch (\Exception $e) {
             throw new \App\Exceptions\NotFoundException(__('Not found.'));
         }
@@ -47,13 +47,13 @@ class AdminController extends Controller
 
         return response()->json([
             'admin' => $admin,
-            'message' => 'Admin created successfully',
+            'message' => __('Created successfully.'),
         ], 201);
     }
 
     public function update(UpdateAdminRequest $request, $id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::role('admin')->where('id', $id)->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         try {
@@ -67,14 +67,14 @@ class AdminController extends Controller
 
         return response()->json(
             [
-                'message' => 'Admin updated successfully',
+                'message' => __('Updated successfully.'),
             ]
         );
     }
 
     public function destroy($id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::role('admin')->where('id', $id)->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         try {
@@ -84,7 +84,7 @@ class AdminController extends Controller
         }
 
         return response()->json([
-            'message' => 'Admin deleted successfully',
+            'message' => __('Deleted successfully.'),
         ]);
     }
 }

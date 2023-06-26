@@ -41,7 +41,7 @@ class CommentController extends Controller
 
         return response()->json(
             [
-                'message' => 'Comment updated successfully',
+                'message' => __('Updated successfully.'),
             ]
         );
     }
@@ -59,7 +59,7 @@ class CommentController extends Controller
 
         return response()->json(
             [
-                'message' => 'Comment deleted successfully',
+                'message' => __('Deleted successfully.'),
             ]
         );
     }

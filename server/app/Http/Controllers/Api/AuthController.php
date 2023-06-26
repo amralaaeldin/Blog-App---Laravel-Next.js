@@ -19,6 +19,7 @@ class AuthController extends Controller
                 'password' => bcrypt($request->password),
             ]);
 
+            $user->assignRole('user');
             $token = auth()->login($user);
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
@@ -36,7 +37,7 @@ class AuthController extends Controller
             $credentials = request(['email', 'password']);
 
             if (!$token = auth()->attempt($credentials)) {
-                return response()->json(['msessage' => 'The provided credentials are incorrect.'], 401);
+                return response()->json(['msessage' => __('The provided credentials are incorrect.')], 401);
             }
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
@@ -55,7 +56,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
         }
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(['message' => __('Logged out successfully.')]);
     }
 
     public function refresh()

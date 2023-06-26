@@ -19,7 +19,6 @@ class EnsureYourselfOrCan
             throw new \App\Exceptions\NotAuthorizedException(__("You are not authorized to do that."));
         }
 
-        $request["haveRoles"] = $user?->getRoleNames()->count();
         return $next($request);
     }
 }

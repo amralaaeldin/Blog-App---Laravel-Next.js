@@ -22,7 +22,8 @@ class StorePostRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'body' => 'required|string|max:2500',
-            'tagNames' => 'array|max:10'
+            'tagNames' => 'array|max:10',
+            'tagNames.*' => 'string|max:255'
         ];
     }
 }

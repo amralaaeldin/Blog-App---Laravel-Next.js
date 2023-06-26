@@ -12,7 +12,7 @@ class UserController extends Controller
     {
         try {
             return response()->json(
-                User::doesntHave('roles')
+                User::role('user')
                     ->whereNotNull('accepted_at')
                     ->select('id', 'name', 'email')
                     ->withCount('posts')->get()
@@ -26,7 +26,7 @@ class UserController extends Controller
     {
         try {
             return response()->json(
-                User::doesntHave('roles')
+                User::role('user')
                     ->whereNull('accepted_at')
                     ->select('id', 'name', 'email')->get()
             );
@@ -39,7 +39,7 @@ class UserController extends Controller
     {
         try {
             return response()->json(
-                User::where('id', $id)->select('id', 'name', 'email')->findOrFail($id)
+                User::role('user')->where('id', $id)->select('id', 'name', 'email')->findOrFail($id)
             );
         } catch (\Exception $e) {
             throw new \App\Exceptions\NotFoundException(__('Not found.'));
@@ -48,7 +48,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, $id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::role('user')->where('id', $id)->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         try {
@@ -69,7 +69,7 @@ class UserController extends Controller
 
     public function accept($id)
     {
-        $user = User::where('id', $id)->select('id', 'name', 'email', 'accepted_at')->first();
+        $user = User::role('user')->where('id', $id)->select('id', 'name', 'email', 'accepted_at')->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         if ($user->accepted_at) {
@@ -93,7 +93,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::role('user')->where('id', $id)->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         try {
