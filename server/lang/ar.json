@@ -6,5 +6,6 @@
   "Updated successfully.": "تم التحديث بنجاح.",
   "Deleted successfully.": "تم الحذف بنجاح.",
   "The provided credentials are incorrect.": "المدخلات غير صحيحة.",
-  "Logged out successfully.": "تم تسجيل الخروج بنجاح."
+  "Logged out successfully.": "تم تسجيل الخروج بنجاح.",
+  "Unauthenticated.": "غير مصرح."
 }
