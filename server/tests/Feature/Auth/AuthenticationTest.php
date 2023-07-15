@@ -10,28 +10,56 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    protected $user;
+
+    protected function setUp(): void
     {
-        $user = User::factory()->create();
+        parent::setUp();
+        $this->user = [
+            'email' => 'testuser@test.com',
+            'password' => '12345678',
+        ];
 
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+        $createdUser = User::create(
+            [
+                'name' => 'testuser',
+                'email' => 'testuser@test.com',
+                'password' => bcrypt('12345678'),
+            ]
+        );
 
-        $this->assertAuthenticated();
-        $response->assertNoContent();
+        $createdUser->assignRole('user');
+    }
+
+    public function test_users_can_login(): void
+    {
+        $response = $this->post('api/login', $this->user);
+
+        $response->assertStatus(200);
+        $this->assertArrayHasKey('token', $response->json());
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
-        $user = User::factory()->create();
-
-        $this->post('/login', [
-            'email' => $user->email,
+        $response = $this->post('api/login', [
+            'email' => $this->user['email'],
             'password' => 'wrong-password',
         ]);
 
-        $this->assertGuest();
+        $response->assertSee(__('The provided credentials are incorrect.'));
+    }
+
+    public function test_validation_works_correctly_when_login()
+    {
+        $response = $this->post('api/login', [
+            'email' => $this->user['email'],
+        ]);
+
+        $response->assertJsonStructure([
+            'errors' => [
+                'password',
+            ],
+        ]);
+        $response->assertStatus(400);
     }
 }

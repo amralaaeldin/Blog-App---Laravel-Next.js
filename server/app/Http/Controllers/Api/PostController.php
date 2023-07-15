@@ -29,8 +29,10 @@ class PostController extends Controller
         try {
             return response()->json(
                 Post::with('user:id,name,email')
+                    ->select('id', 'title', 'body', 'user_id', 'created_at', 'updated_at',)
+                    ->withCount('comments')
                     ->with('comments.user:id,name,email')
-                    ->select('id', 'title', 'body', 'user_id')->findOrfail($id)
+                    ->findOrfail($id)
             );
         } catch (\Exception $e) {
             throw new \App\Exceptions\NotFoundException(__('Not found.'));
@@ -91,7 +93,7 @@ class PostController extends Controller
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
         }
-        
+
         return response()->json(
             [
                 'message' => __('Deleted successfully.'),

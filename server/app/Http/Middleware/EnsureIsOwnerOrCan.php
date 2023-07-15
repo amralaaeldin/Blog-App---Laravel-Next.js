@@ -14,8 +14,8 @@ class EnsureIsOwnerOrCan
 
         if (
             !$request->user()->hasAnyRole($roles) &&
-            $request->user()->id != $Model::where('id', $request->id)->select('id', 'user_id')->first()?->user->id &&
-            $request->user()->id != $Model::where('id', $request->id)->select('id', 'post_id')->first()?->post->user->id
+            $request->user()->id != $Model::where('id', $request->id)->first()?->user?->id &&
+            $request->user()->id != $Model::where('id', $request->id)->first()?->post?->user?->id
         ) {
             throw new \App\Exceptions\NotAuthorizedException(__("You are not authorized to do that."));
         }

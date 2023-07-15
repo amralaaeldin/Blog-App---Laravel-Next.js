@@ -28,33 +28,33 @@ class UserController extends Controller
             return response()->json(
                 User::role('user')
                     ->whereNull('accepted_at')
-                    ->select('id', 'name', 'email')->get()
+                    ->select('id', 'name', 'email', 'created_at')->get()
             );
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));
         }
     }
 
-    public function show($id)
+    public function show($id = null)
     {
         try {
             return response()->json(
-                User::role('user')->where('id', $id)->select('id', 'name', 'email')->findOrFail($id)
+                User::role('user')->select('id', 'name', 'email')->findOrFail($id ?? auth()->user()->id)
             );
         } catch (\Exception $e) {
             throw new \App\Exceptions\NotFoundException(__('Not found.'));
         }
     }
 
-    public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, $id = null)
     {
-        $user = User::role('user')->where('id', $id)->first();
+        $user = User::role('user')->where('id', $id ?? auth()->user()->id)->first();
         if (!$user) throw new \App\Exceptions\NotFoundException(__('Not found.'));
 
         try {
             $user->update([
-                'name' => $request->name,
-                'password' => bcrypt($request->password),
+                'name' => $request->name ?? $user->name,
+                'password' => $request->password ? bcrypt($request->password) : $user->password,
             ]);
         } catch (\Exception $e) {
             throw new \App\Exceptions\QueryDBException(__('An error occurred while retrieving.'));

@@ -22,7 +22,7 @@ Route::group(
             ->post('posts/{postId}/comments', [CommentController::class, 'store']);
         Route::middleware(['auth', 'is_owner:comment'])
             ->patch('posts/{postId}/comments/{id}', [CommentController::class, 'update']);
-        Route::middleware(['auth', 'is_owner_or_can:comment,admin,super-admin'])
+        Route::middleware(['auth', 'is_owner_or_can:comment,admin,super_admin'])
             ->delete('posts/{postId}/comments/{id}', [CommentController::class, 'destroy']);
 
         // posts routes
@@ -34,32 +34,33 @@ Route::group(
                 ->post('posts', [PostController::class, 'store']);
             Route::middleware(['is_owner:post'])
                 ->patch('posts/{id}', [PostController::class, 'update']);
-            Route::middleware(['is_owner_or_can:post,admin,super-admin'])
+            Route::middleware(['is_owner_or_can:post,admin,super_admin'])
                 ->delete('posts/{id}', [PostController::class, 'destroy']);
         });
 
         // users routes
         Route::group(['middleware' => ['auth', 'can:accept-users']], function () {
             Route::get('users', [UserController::class, 'index']);
-            Route::get('users/accept', [UserController::class, 'indexPending']);
-            Route::patch('users/{id}/accept', [UserController::class, 'accept']);
-        });
-
-        Route::group(['middleware' => ['auth', 'is_yourself_or_can:admin,super_admin']], function () {
+            Route::get('users/pending', [UserController::class, 'indexPending']);
             Route::get('users/{id}', [UserController::class, 'show']);
-            Route::patch('users/{id}', [UserController::class, 'update'])->role('user');
+            Route::patch('users/{id}/accept', [UserController::class, 'accept']);
             Route::delete('users/{id}', [UserController::class, 'destroy']);
         });
 
+        Route::group(['middleware' => ['auth', 'role:user']], function () {
+            Route::get('u/profile', [UserController::class, 'show']);
+            Route::patch('u/profile', [UserController::class, 'update']);
+        });
+
         // super_admin routes 
-        Route::group(['middleware' => ['auth', 'is_yourself_or_can:super_admin']], function () {
+        Route::group(['middleware' => ['auth', 'role:super_admin']], function () {
             Route::get('admins', [AdminController::class, 'index']);
             Route::get('admins/{id}', [AdminController::class, 'show']);
-            Route::post('admins', [AdminController::class, 'create']);
+            Route::post('admins', [AdminController::class, 'store']);
             Route::patch('admins/{id}', [AdminController::class, 'update']);
             Route::delete('admins/{id}', [AdminController::class, 'destroy']);
         });
 
-        require __DIR__ . '/auth-api.php';
+        require __DIR__ . '/auth.php';
     }
 );

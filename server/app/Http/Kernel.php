@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'is_owner' => \App\Http\Middleware\EnsureIsOwner::class,
         'is_owner_or_can' => \App\Http\Middleware\EnsureIsOwnerOrCan::class,
         'is_yourself_or_can' => \App\Http\Middleware\EnsureYourselfOrCan::class,
+        'localized' => \App\Http\Middleware\SetLocale::class,
     ];
 }

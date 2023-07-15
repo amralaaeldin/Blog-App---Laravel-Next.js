@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
+use App\Models\Post;
 
 
 class CommentController extends Controller
 {
     public function store(StoreCommentRequest $request, $postId)
     {
+        $post = Post::find($postId);
+        if (!$post) throw new \App\Exceptions\NotFoundException(__('Not found.'));
+
         try {
             return response()->json(
                 Comment::create([

@@ -31,7 +31,7 @@ class AdminController extends Controller
         }
     }
 
-    public function create(StoreAdminRequest $request)
+    public function store(StoreAdminRequest $request)
     {
         try {
             $admin = User::create([
