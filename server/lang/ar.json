@@ -7,5 +7,14 @@
   "Deleted successfully.": "تم الحذف بنجاح.",
   "The provided credentials are incorrect.": "المدخلات غير صحيحة.",
   "Logged out successfully.": "تم تسجيل الخروج بنجاح.",
-  "Unauthenticated.": "غير مصرح."
+  "Unauthenticated.": "غير مصرح.",
+  "User does not have the right roles.": "المستخدم ليس لديه الأدوار المناسبة.",
+  "User does not have the right permissions.": "المستخدم ليس لديه الصلاحيات المناسبة.",
+  "User does not have any of the necessary access rights.": "المستخدم ليس لديه أي من الحقوق اللازمة.",
+  "User is not logged in.": "المستخدم غير مسجل الدخول.",
+  " Necessary roles are ": " الأدوار اللازمة هي ",
+  " Necessary permissions are ": " الصلاحيات اللازمة هي ",
+  " Necessary roles or permissions are ": " الأدوار أو الصلاحيات اللازمة هي ",
+  "admin": "مدير",
+  "super_admin": "مدير عام"
 }

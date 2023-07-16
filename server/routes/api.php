@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\AdminController;
 
 
 // tags routes
-Route::get('tags', [TagController::class, 'index'])->middleware('role:admin');
+Route::get('tags', [TagController::class, 'index']);
 Route::middleware(['auth'])
     ->get('tags/{tag}', [TagController::class, 'indexPostsOnTag']);
 
